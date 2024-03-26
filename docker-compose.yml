@@ -91,10 +91,34 @@ services:
         entrypoint: ['npm']
         networks:
             - laravel
+    redis:
+        container_name: "redis"
+        image: redis:alpine
+        restart: unless-stopped
+        ports:
+            - "${FORWARD_REDIS_PORT:-6379}:6379"
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            retries: 3
+            timeout: 5s
+        networks:
+            - laravel
 
 
 
 
 
-
-
+    phpmyadmin:
+        container_name: "phpmyadmin"
+        image: phpmyadmin/phpmyadmin
+        restart: unless-stopped
+        ports:
+            - "${FORWARD_PHPMYADMIN_PORT:-8081}:80"
+        environment:
+            PMA_HOST: mysql
+            PMA_PASSWORD: "${DB_PASSWORD}"
+            UPLOAD_LIMIT: 64M
+        depends_on:
+            - mysql
+        networks:
+            - laravel
